@@ -5,12 +5,13 @@ import br.com.softwareexpress.sitef.android.CliSiTef
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.Callback
 
 open class SiTefClient( protected val cliSiTef: CliSiTef)  {
-    private var resultHandler: com.facebook.react.bridge.Callback? = null
+    private var resultHandler: Callback? = null
 
     @ReactMethod
-    fun setResultHandler(callback: com.facebook.react.bridge.Callback) {
+    fun setResultHandler(callback: Callback) {
         resultHandler = callback
     }
 
