@@ -1,4 +1,5 @@
-package com.nativemodule // replace your-app-name with your app’s name
+package com.nativemodule;
+// replace your-app-name with your app’s name
 
 import android.view.View
 import com.facebook.react.ReactPackage

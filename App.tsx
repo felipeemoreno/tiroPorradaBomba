@@ -9,23 +9,35 @@
  */
 
 import React from 'react';
-import {NativeModules, Button, SafeAreaView, StatusBar} from 'react-native';
+import {
+  NativeModules,
+  Button,
+  SafeAreaView,
+  StatusBar,
+  NativeEventEmitter,
+} from 'react-native';
 import CalendarModule from './CalendarModule';
 
 const App = () => {
-  const {CliSiteFModule} = NativeModules;
+  const {CliSiteFModule, eventoTeste} = NativeModules;
 
-  const {DEFAULT_EVENT_NAME} = CalendarModule.getConstants();
-  console.log(DEFAULT_EVENT_NAME);
+  // const {DEFAULT_EVENT_NAME} = CalendarModule.getConstants();
+  // console.log(DEFAULT_EVENT_NAME);
 
   const onPress = () => {
-    CalendarModule.createCalendarEvent('Party', 'My House', eventId => {
-      console.log(`Created a new event with id ${eventId}`);
-      CalendarModule.showToast(`Event Created ${eventId}`);
-    });
+    // CalendarModule.createCalendarEvent('Party', 'My House', eventId => {
+    //   console.log(`Created a new event with id ${eventId}`);
+    //   CalendarModule.showToast(`Event Created ${eventId}`);
+    // });
 
     CliSiteFModule.ping('Ola mundo 2');
   };
+
+  const eventEmitter = new NativeEventEmitter(eventoTeste);
+
+  eventEmitter.addListener('eventoTeste', parametros => {
+    console.log('parametros', parametros);
+  });
 
   return (
     <SafeAreaView>
