@@ -19,6 +19,7 @@ class CliSiTefListener(private val cliSiTef: CliSiTef, val reactContext: ReactCo
 
     private var eventSink: DeviceEventManagerModule.RCTDeviceEventEmitter? = null
 
+
     override fun onData(
         currentStage: Int,
         command: Int,
@@ -101,7 +102,7 @@ class CliSiTefListener(private val cliSiTef: CliSiTef, val reactContext: ReactCo
     }
 
     fun sendMessage(msg: Any) {
-        Log.d("cliSiTef MSG", "eventoTeste")
+        Log.d("cliSiTef MSG", msg.toString())
 
         reactContext
             .getJSModule<DeviceEventManagerModule.RCTDeviceEventEmitter>(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)

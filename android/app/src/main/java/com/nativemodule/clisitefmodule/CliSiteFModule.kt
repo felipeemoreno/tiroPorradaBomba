@@ -10,6 +10,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.modules.core.DeviceEventManagerModule
+import com.nativemodule.clisitefmodule.TefMethods
 
 class CliSiteFModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -20,15 +21,35 @@ class CliSiteFModule(private val reactContext: ReactApplicationContext) : ReactC
     private val cliSiTef: CliSiTef
     private var cliSiTefListener: ICliSiTefListener
 
+
     init{
         cliSiTef = CliSiTef(reactContext);
-        cliSiTef.configure("127.0.0.1", "0", "1","0")
+
+        cliSiTef.configure("127.0.0.1", "00000000", "SE000001", "[TipoPinPad=Android_BT]")
+
         cliSiTefListener = CliSiTefListener(cliSiTef, reactContext)
 
-//        cliSiTef.setMessageHandler(onMessage(handler.looper))
+        cliSiTef.setMessageHandler((cliSiTefListener as CliSiTefListener).onMessage(handler.looper))
 
-        Log.d("cliSiTef V", cliSiTef.version.toString())
+        Log.d("cliSiTef version", cliSiTef.version.toString())
+        Log.d("cliSiTef cliSiTefIV", cliSiTef.cliSiTefIVersion.toString())
 
+
+
+    }
+
+    @ReactMethod
+    fun ping(text: String) {
+        Log.d("CliSiteFModule", "Text from react: $text")
+    }
+
+    @ReactMethod
+    fun startTransaction(amount: Int) {
+        val tefMethods = TefMethods(cliSiTef)
+
+        tefMethods.startTransaction(cliSiTefListener, 6, "100", "2", "3", "4", "5")
+
+        Log.d("CliSiteFModule", "startTransaction value: ${amount.toString()}")
     }
 
 //    fun run() {
@@ -56,11 +77,7 @@ class CliSiteFModule(private val reactContext: ReactApplicationContext) : ReactC
 //        true
 //    }
 
-    @ReactMethod
-    fun ping(text: String) {
-        cliSiTef.startTransaction(cliSiTefListener, 6, "100", "2", "3", "4", "5", "6")
-        Log.d("CliSiteFModule", "Ping: $text")
-    }
+
 
 //    fun sendMessage(msg: Any) {
 //        Log.d("CliSiteFModule", "eventoTeste")
