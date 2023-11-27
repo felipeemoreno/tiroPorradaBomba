@@ -2,16 +2,15 @@ package com.nativemodule;
 
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
 import android.util.Log
 import br.com.softwareexpress.sitef.android.CliSiTef
 import br.com.softwareexpress.sitef.android.CliSiTefI
 import br.com.softwareexpress.sitef.android.ICliSiTefListener
 import java.lang.Exception
-import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.WritableMap
+import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.nativemodule.PinPadEvents
 
 class CliSiTefListener(private val cliSiTef: CliSiTef, val reactContext: ReactContext): ICliSiTefListener {
 
@@ -30,7 +29,7 @@ class CliSiTefListener(private val cliSiTef: CliSiTef, val reactContext: ReactCo
     ) {
         val data = ""
         var clisitefData: CliSiTefData? = null
-
+        Log.d("cliSiTef", "onData: $command")
         when(command) {
             CliSiTef.CMD_SHOW_MSG_CASHIER,
             CliSiTef.CMD_CLEAR_MSG_CASHIER_CUSTOMER,
@@ -106,7 +105,16 @@ class CliSiTefListener(private val cliSiTef: CliSiTef, val reactContext: ReactCo
 
         reactContext
             .getJSModule<DeviceEventManagerModule.RCTDeviceEventEmitter>(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-            .emit("eventoTeste", msg)
+            .emit("eventsMessage", msg)
     }
+
+//    private fun sendMessage( msg: Any) {
+//        val params = Arguments.createMap().apply {
+//            putString("eventProperty", "someValue")
+//        }
+//        reactContext
+//            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+//            .emit("eventsMessage", params)
+//    }
 
 }

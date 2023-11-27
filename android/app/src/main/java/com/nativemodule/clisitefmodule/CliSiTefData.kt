@@ -1,5 +1,8 @@
 package com.nativemodule;
 
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.WritableMap
+
 class CliSiTefData(
     val event: DataEvents,
     val currentStage: Int,
@@ -9,15 +12,27 @@ class CliSiTefData(
     val maxLength: Int = 0,
     val minLength: Int = 0
 ) {
-    fun toDataSink(): Map<String, Any> {
-        return mapOf(
-            "event" to event.named,
-            "currentStage" to currentStage,
-            "buffer" to buffer,
-            "shouldContinue" to shouldContinue,
-            "fieldId" to fieldId,
-            "maxLength" to maxLength,
-            "minLength" to minLength
-        )
+    fun toDataSink(): Any {
+        val params:WritableMap = Arguments.createMap()
+
+        params.putString("event", event.named)
+        params.putInt("currentStage",currentStage)
+        params.putString("buffer", buffer)
+        params.putBoolean("shouldContinue", shouldContinue)
+        params.putInt("fieldId", fieldId)
+        params.putInt("maxLength", maxLength)
+        params.putInt("minLength", minLength)
+
+
+        return params
+//        return mapOf(
+//            "event" to event.named,
+//            "currentStage" to currentStage,
+//            "buffer" to buffer,
+//            "shouldContinue" to shouldContinue,
+//            "fieldId" to fieldId,
+//            "maxLength" to maxLength,
+//            "minLength" to minLength
+//        )
     }
 }

@@ -14,7 +14,7 @@ interface CalendarInterface {
   createCalendarEvent(
     name: string,
     location: string,
-    callback?: (eventId: string) => void,
+    callback?: (error: any, eventId: string) => void,
   ): void;
   getConstants(): ConstantesInterface;
 }

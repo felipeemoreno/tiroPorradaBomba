@@ -2,13 +2,14 @@ package com.nativemodule.calendarmodule;
 
 import android.util.Log
 import android.view.Gravity
+import java.util.UUID
 import android.widget.Toast
+import com.facebook.react.bridge.Callback
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.Callback
 
 class CalendarModule(val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -18,8 +19,9 @@ class CalendarModule(val reactContext: ReactApplicationContext) : ReactContextBa
     @ReactMethod
     fun createCalendarEvent(name: String, location: String, callback: Callback) {
         Log.d("CalendarModule", "Create event called with name: $name and location: $location")
-        val eventId = "2"
-        callback.invoke(eventId)
+        val myUuid = UUID.randomUUID()
+        val eventId = myUuid.toString()
+        callback.invoke(null, eventId)
     }
 
     override fun getConstants(): MutableMap<String, Any> =
