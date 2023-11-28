@@ -14,11 +14,19 @@ interface ConstantesInterface {
 }
 
 interface CliSiteFInterface {
-  eventsMessage: NativeModule;
+  configure(
+    enderecoSitef: string,
+    codigoLoja: string,
+    numeroTerminal: string,
+    cnpjEmpresa: string,
+    cnpjLoja: string,
+  ): void;
   ping(pingMsg: string): void;
+  setPinpadDisplayMessage(message: string): void;
+  pinpadReadYesNo(message: string): void;
+  pinpadIsPresent(): void;
+  eventsMessage: NativeModule;
   startTransaction(amount: number): void;
-  pinPadMessage(message: string): void;
-  pinPadIsPresent(callback?: (error: any, isPresent: boolean) => void): void;
   continueTransaction(data: string): void;
   abortTransaction(value: number): void;
   // startTransaction(value: number, callback?: (eventId: string) => void): void;

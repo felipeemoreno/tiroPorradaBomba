@@ -8,6 +8,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ReactShadowNode
 import com.facebook.react.uimanager.ViewManager
 import com.nativemodule.calendarmodule.CalendarModule
+import com.nativemodule.clisitefmodule.CliSiteFModule
 
 class MyAppPackage : ReactPackage {
 

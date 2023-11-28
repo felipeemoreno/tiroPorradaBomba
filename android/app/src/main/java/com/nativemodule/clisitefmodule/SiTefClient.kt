@@ -1,5 +1,6 @@
 package com.nativemodule.clisitefmodule
 
+import android.annotation.SuppressLint
 import android.util.Log
 import br.com.softwareexpress.sitef.android.CliSiTef
 import com.facebook.react.bridge.ReactApplicationContext
@@ -15,12 +16,23 @@ open class SiTefClient( protected val cliSiTef: CliSiTef)  {
         resultHandler = callback
     }
 
+    @SuppressLint("LongLogTag")
     @ReactMethod
     fun success(result: Any?) {
         if (resultHandler != null) {
             resultHandler!!.invoke(result)
         } else {
-            Log.v("SiTefClient::success", result.toString())
+            Log.d("com.nativemodule.clisitefmodule.SiTefClient::success", result.toString())
+        }
+    }
+
+    @SuppressLint("LongLogTag")
+    @ReactMethod
+    fun error(errorCode: String, errorMessage: String?, errorDetails: Any? = null) {
+        if (resultHandler != null) {
+            resultHandler!!.invoke(errorCode, errorMessage, errorDetails);
+        } else {
+            Log.d("com.nativemodule.clisitefmodule.SiTefClient::error::$errorCode", errorMessage.toString())
         }
     }
 }

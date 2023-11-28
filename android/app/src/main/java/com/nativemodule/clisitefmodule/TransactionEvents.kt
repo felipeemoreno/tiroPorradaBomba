@@ -1,4 +1,4 @@
-package com.nativemodule;
+package com.nativemodule.clisitefmodule
 
 enum class TransactionEvents(val named: String) {
     TRANSACTION_CONFIRM("TRANSACTION_CONFIRM"),

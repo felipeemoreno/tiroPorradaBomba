@@ -1,4 +1,4 @@
-package com.nativemodule
+package com.nativemodule.clisitefmodule
 
 enum class PinPadEvents(val named: String) {
     GENERIC_ERROR("GENERIC_ERROR"),

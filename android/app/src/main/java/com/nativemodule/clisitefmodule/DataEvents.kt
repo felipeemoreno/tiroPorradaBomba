@@ -1,4 +1,4 @@
-package com.nativemodule;
+package com.nativemodule.clisitefmodule
 
 enum class DataEvents(val named: String) {
     PRESS_ANY_KEY("PRESS_ANY_KEY"),

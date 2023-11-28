@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
   Button,
@@ -21,25 +21,21 @@ const App = () => {
     CliSiteFModule.ping('React Button Clicked!');
   };
 
+  const handlePinpadDisplayMessage = (message: string) => {
+    CliSiteFModule.setPinpadDisplayMessage(message);
+  };
+
+  const handlePinpadReadYesNo = () =>
+    CliSiteFModule.pinpadReadYesNo('pinpadReadYesNo');
+
+  const handlePinpadIsPresent = () => CliSiteFModule.pinpadIsPresent();
+
   const hanldeStartTransaction = () => {
     if (!isNaN(Number(amount))) {
       CliSiteFModule.startTransaction(Number(amount));
     } else {
       ToastAndroid.show('Insira o valor da compra', 2000);
     }
-  };
-
-  const handlePinpadMessage = (message: string) => {
-    CliSiteFModule.pinPadMessage(message);
-  };
-
-  const handlePinpadIsPresent = () => {
-    CliSiteFModule.pinPadIsPresent((error, isPresent) => {
-      if (error) {
-        console.error('handlePinpadIsPresent error:', error);
-      }
-      console.log('isPresent', isPresent);
-    });
   };
 
   const handleContinueTransaction = () => {
@@ -82,7 +78,7 @@ const App = () => {
       console.log(messages.buffer);
 
       if (data.buffer === 'Forneca o numero do cartao') {
-        handlePinpadMessage('Entre com o cartão');
+        handlePinpadDisplayMessage('Entre com o cartão');
         setEventData(data);
       }
     } else {
@@ -90,13 +86,15 @@ const App = () => {
     }
   });
 
-  // useEffect(() => {
-  //   CliSiteFModule.configure({
-  //     serverIp: '',
-  //     storeCode: '',
-  //     terminalNumber: '':
-  //   })
-  // },[])
+  useEffect(() => {
+    CliSiteFModule.configure(
+      '192.168.0.17',
+      '00000000',
+      'SE000001',
+      '00000000000000',
+      '00000000000000',
+    );
+  }, []);
 
   return (
     <SafeAreaView>
@@ -137,14 +135,21 @@ const App = () => {
           onPress={() => handleAbortTransaction(-1)}
         />
       </View>
-      <View style={{margin: 35}}>
+      <View style={{margin: 15}}>
         <Button
           title="PinPad Message Botão 1!"
           color="#841584"
-          onPress={() => handlePinpadMessage('Botão 1')}
+          onPress={() => handlePinpadDisplayMessage('Botão 1')}
         />
       </View>
-      <View style={{margin: 35}}>
+      <View style={{margin: 15}}>
+        <Button
+          title="PinPad Read Yes No!"
+          color="#841584"
+          onPress={() => handlePinpadReadYesNo()}
+        />
+      </View>
+      <View style={{margin: 15}}>
         <Button
           title="PinPad is Present!"
           color="#841584"

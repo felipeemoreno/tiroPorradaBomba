@@ -1,4 +1,4 @@
-package com.nativemodule;
+package com.nativemodule.clisitefmodule
 
 import android.os.Handler
 import android.os.Looper
@@ -107,14 +107,4 @@ class CliSiTefListener(private val cliSiTef: CliSiTef, val reactContext: ReactCo
             .getJSModule<DeviceEventManagerModule.RCTDeviceEventEmitter>(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
             .emit("eventsMessage", msg)
     }
-
-//    private fun sendMessage( msg: Any) {
-//        val params = Arguments.createMap().apply {
-//            putString("eventProperty", "someValue")
-//        }
-//        reactContext
-//            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-//            .emit("eventsMessage", params)
-//    }
-
 }

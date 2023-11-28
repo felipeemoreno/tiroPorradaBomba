@@ -1,4 +1,4 @@
-package com.nativemodule;
+package com.nativemodule.clisitefmodule
 
 import android.os.Handler
 import android.os.Looper
@@ -19,22 +19,52 @@ class CliSiteFModule(private val reactContext: ReactApplicationContext) : ReactC
     override fun getName() = "CliSiteFModule"
 
     private val handler: Handler = Handler(Looper.getMainLooper())
-    private val cliSiTef: CliSiTef = CliSiTef(reactContext)
-    private var cliSiTefListener: ICliSiTefListener
-    private val tefMethods = TefMethods(cliSiTef)
 
-    init{
-        cliSiTef.configure("192.168.0.17", "00000000", "SE000001", "[TipoPinPad=Android_BT]")
-        cliSiTefListener = CliSiTefListener(cliSiTef, reactContext)
+    private val cliSiTef: CliSiTef = CliSiTef(reactContext)
+
+    private val tefMethods:TefMethods = TefMethods(cliSiTef)
+
+    private val pinPadMethods:PinPadMethods = PinPadMethods(cliSiTef)
+
+    private var cliSiTefListener: ICliSiTefListener = CliSiTefListener(cliSiTef, reactContext)
+    
+
+    @ReactMethod
+    fun configure(
+        enderecoSitef: String,
+        codigoLoja: String,
+        numeroTerminal: String,
+        cnpjEmpresa: String,
+        cnpjLoja: String
+    ) {
+        tefMethods.configure(enderecoSitef, codigoLoja, numeroTerminal, "[TipoPinPad=ANDROID_BT];[ParmsClient=1=$cnpjLoja;2=$cnpjEmpresa]")
         cliSiTef.setMessageHandler((cliSiTefListener as CliSiTefListener).onMessage(handler.looper))
 
         Log.d("cliSiTef version", cliSiTef.version.toString())
     }
 
+
     @ReactMethod
     fun ping(text: String) {
         Log.d("CliSiteF", "Ping: $text")
     }
+
+    @ReactMethod
+    fun setPinpadDisplayMessage(msg: String) {
+        pinPadMethods.setDisplayMessage(msg)
+    }
+
+    @ReactMethod
+    fun pinpadReadYesNo(msg: String) {
+        pinPadMethods.readYesOrNo(msg)
+    }
+
+    @ReactMethod
+    fun pinpadIsPresent() {
+        pinPadMethods.isPresent()
+    }
+
+
 
     @ReactMethod
     fun startTransaction(amount: Int) {
@@ -54,15 +84,8 @@ class CliSiteFModule(private val reactContext: ReactApplicationContext) : ReactC
         cliSiTef.continueTransaction(data)
     }
 
-    @ReactMethod
-    fun pinPadMessage(msg: String) {
-        cliSiTef.pinpad.setDisplayMessage(msg)
-    }
 
-    @ReactMethod
-    fun pinPadIsPresent(callback: Callback) {
-        val isPresent = cliSiTef.pinpad.isPresent()
-        callback.invoke(null, isPresent)
-    }
+
+
 
 }

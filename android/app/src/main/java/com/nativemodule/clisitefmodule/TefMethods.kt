@@ -2,6 +2,7 @@ package com.nativemodule.clisitefmodule
 
 import br.com.softwareexpress.sitef.android.CliSiTef
 import br.com.softwareexpress.sitef.android.ICliSiTefListener
+import com.facebook.react.bridge.Callback
 
 class TefMethods(cliSiTef: CliSiTef): SiTefClient(cliSiTef) {
     var idConfig: Int = 0;
@@ -48,7 +49,25 @@ class TefMethods(cliSiTef: CliSiTef): SiTefClient(cliSiTef) {
         }
     }
 
-    private fun error(message: String, s: String) {
-        TODO("Not yet implemented")
+    fun configure(enderecoSiTef: String, codigoLoja: String, numeroTerminal: String, parametrosAdicionais: String) {
+        try {
+            idConfig = cliSiTef.configure(enderecoSiTef, codigoLoja, numeroTerminal, parametrosAdicionais);
+            when(idConfig) {
+                0 -> success(true)
+                1 -> error(idConfig.toString(), "Invalid enderecoSiTef or not reachable")
+                2 -> error(idConfig.toString(), "Invalid codigoLoja")
+                3 -> error(idConfig.toString(), "Invalid numeroTerminal")
+                6 -> error(idConfig.toString(), "TCP/IP init error")
+                7 -> error(idConfig.toString(), "Memory overflow")
+                8 -> error(idConfig.toString(), "CliSiTef not found")
+                9 -> error(idConfig.toString(), "SiTef Server config exceeded")
+                10 -> error(idConfig.toString(), "Could not access CliSiTef dir", "Check for permissions")
+                11 -> error(idConfig.toString(), "Invalid data")
+                12 -> error(idConfig.toString(), "Safe mode not enabled")
+                13 -> error(idConfig.toString(), "Invalid DLL path")
+            }
+        } catch (e: Error) {
+            error("configure", e.toString())
+        }
     }
 }

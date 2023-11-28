@@ -1,4 +1,4 @@
-package com.nativemodule;
+package com.nativemodule.clisitefmodule
 
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
