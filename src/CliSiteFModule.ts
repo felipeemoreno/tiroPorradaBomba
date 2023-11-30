@@ -22,14 +22,17 @@ interface CliSiteFInterface {
     cnpjLoja: string,
   ): void;
   ping(pingMsg: string): void;
-  setPinpadDisplayMessage(message: string): void;
-  pinpadReadYesNo(message: string): void;
-  pinpadIsPresent(): void;
-  eventsMessage: NativeModule;
-  startTransaction(amount: number): void;
-  continueTransaction(data: string): void;
+  setPinpadDisplayMessage(
+    message: string,
+    callback?: (response: any) => void,
+  ): Promise<{response: any}>;
+  pinpadReadYesNo(message: string): Promise<{response: any}>;
+  pinpadIsPresent(): Promise<{response: any}>;
+  startTransaction(amount: number): Promise<{response: any}>;
+  continueTransaction(data: string): Promise<{response: any}>;
   abortTransaction(value: number): void;
   // startTransaction(value: number, callback?: (eventId: string) => void): void;
   getConstants(): ConstantesInterface;
+  eventsMessage: NativeModule;
 }
 export default CliSiteFModule as CliSiteFInterface;

@@ -7,20 +7,21 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Callback
+import com.facebook.react.bridge.Promise
 
 open class SiTefClient( protected val cliSiTef: CliSiTef)  {
-    private var resultHandler: Callback? = null
+    private var resultHandler: Promise? = null
 
     @ReactMethod
-    fun setResultHandler(callback: Callback) {
-        resultHandler = callback
+    fun setResultHandler(promise: Promise) {
+        resultHandler = promise
     }
 
     @SuppressLint("LongLogTag")
     @ReactMethod
     fun success(result: Any?) {
         if (resultHandler != null) {
-            resultHandler!!.invoke(result)
+            resultHandler!!.resolve(result)
         } else {
             Log.d("com.nativemodule.clisitefmodule.SiTefClient::success", result.toString())
         }
@@ -30,7 +31,8 @@ open class SiTefClient( protected val cliSiTef: CliSiTef)  {
     @ReactMethod
     fun error(errorCode: String, errorMessage: String?, errorDetails: Any? = null) {
         if (resultHandler != null) {
-            resultHandler!!.invoke(errorCode, errorMessage, errorDetails);
+//            resultHandler!!.invoke(errorCode, errorMessage, errorDetails);
+            resultHandler!!.reject(errorCode, errorMessage)
         } else {
             Log.d("com.nativemodule.clisitefmodule.SiTefClient::error::$errorCode", errorMessage.toString())
         }

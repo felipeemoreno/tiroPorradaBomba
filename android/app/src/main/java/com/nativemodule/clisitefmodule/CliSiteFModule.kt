@@ -7,6 +7,7 @@ import br.com.softwareexpress.sitef.android.CliSiTef
 import br.com.softwareexpress.sitef.android.CliSiTefI
 import br.com.softwareexpress.sitef.android.ICliSiTefListener
 import com.facebook.react.bridge.Callback
+import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -50,24 +51,36 @@ class CliSiteFModule(private val reactContext: ReactApplicationContext) : ReactC
     }
 
     @ReactMethod
-    fun setPinpadDisplayMessage(msg: String) {
-        pinPadMethods.setDisplayMessage(msg)
+    fun setPinpadDisplayMessage(msg: String, promise: Promise) {
+        try {
+            pinPadMethods.setResultHandler(promise)
+            pinPadMethods.setDisplayMessage(msg)
+        } catch (e: Throwable) {
+            promise.reject("setPinpadDisplayMessage", "Error parsing date", e)
+        }
     }
 
     @ReactMethod
-    fun pinpadReadYesNo(msg: String) {
-        pinPadMethods.readYesOrNo(msg)
+    fun pinpadReadYesNo(msg: String, promise: Promise) {
+        try {
+            pinPadMethods.setResultHandler(promise)
+            pinPadMethods.readYesOrNo(msg)
+        } catch (e: Throwable) {
+            promise.reject("pinpadReadYesNo", "Error parsing date", e)
+
+        }
     }
 
     @ReactMethod
-    fun pinpadIsPresent() {
+    fun pinpadIsPresent( promise: Promise) {
+        pinPadMethods.setResultHandler(promise)
         pinPadMethods.isPresent()
     }
 
 
-
     @ReactMethod
-    fun startTransaction(amount: Int) {
+    fun startTransaction(amount: Int, promise: Promise) {
+        tefMethods.setResultHandler(promise)
         tefMethods.startTransaction(cliSiTefListener, 6, "100", "2", "3", "4", "5")
         Log.d("CliSiteF", "startTransaction value: ${amount.toString()}")
     }
@@ -79,9 +92,10 @@ class CliSiteFModule(private val reactContext: ReactApplicationContext) : ReactC
 
     }
     @ReactMethod
-    fun continueTransaction(data: String) {
-        Log.d("CliSiteF", "continueTransaction value: ${data.toString()}")
+    fun continueTransaction(data: String, promise: Promise) {
+
         cliSiTef.continueTransaction(data)
+        Log.d("CliSiteF", "continueTransaction value: ${data.toString()}")
     }
 
 

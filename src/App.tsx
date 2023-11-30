@@ -8,12 +8,17 @@ import {
   View,
   TextInput,
   ToastAndroid,
+  FlatList,
+  Text,
 } from 'react-native';
 
 import CliSiteFModule from './CliSiteFModule';
 import CalendarModule from './CalendarModule';
 
+import {OnData} from './model/onData';
+
 const App = () => {
+  const [notifications, setNotifications] = useState<OnData[]>([]);
   const [amount, setAmount] = useState<string>();
   const [eventData, setEventData] = useState<{}>();
 
@@ -21,70 +26,56 @@ const App = () => {
     CliSiteFModule.ping('React Button Clicked!');
   };
 
-  const handlePinpadDisplayMessage = (message: string) => {
-    CliSiteFModule.setPinpadDisplayMessage(message);
+  const handlePinpadDisplayMessage = async (message: string) => {
+    try {
+      const response = await CliSiteFModule.setPinpadDisplayMessage(message);
+      console.log('response pinpad display', response);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
-  const handlePinpadReadYesNo = () =>
-    CliSiteFModule.pinpadReadYesNo('pinpadReadYesNo');
+  const handlePinpadReadYesNo = async () => {
+    const response = await CliSiteFModule.pinpadReadYesNo('pinpadReadYesNo');
+    console.log('response', response);
+  };
 
-  const handlePinpadIsPresent = () => CliSiteFModule.pinpadIsPresent();
+  const handlePinpadIsPresent = async () => {
+    const response = await CliSiteFModule.pinpadIsPresent();
+    console.log('response is present', response);
+  };
 
-  const hanldeStartTransaction = () => {
+  const hanldeStartTransaction = async () => {
     if (!isNaN(Number(amount))) {
-      CliSiteFModule.startTransaction(Number(amount));
+      try {
+        const response = await CliSiteFModule.startTransaction(Number(amount));
+        console.log('startTransaction', response);
+      } catch (error) {
+        console.log('response error start', error);
+      }
     } else {
       ToastAndroid.show('Insira o valor da compra', 2000);
     }
   };
 
-  const handleContinueTransaction = () => {
-    if (eventData) {
-      CliSiteFModule.continueTransaction(JSON.stringify(eventData));
-    }
+  const handleContinueTransaction = async () => {
+    try {
+      let data = '';
+      if (eventData === 'card') {
+        data = '5555666677778884';
+      } else if (eventData === 'vencimento') {
+        data = '1122';
+      } else if (eventData === 'forma de pagamento') {
+        data = '1';
+      }
+      const response = await CliSiteFModule.continueTransaction(data);
+      console.log('response continue', response);
+    } catch (error) {}
   };
 
   const handleAbortTransaction = (value = -1) => {
     CliSiteFModule.abortTransaction(value);
   };
-
-  const eventEmitter = new NativeEventEmitter(CliSiteFModule.eventsMessage);
-
-  eventEmitter.addListener('eventsMessage', (messages: any) => {
-    // const eventmesssage = JSON.parse(messages);
-    console.log(typeof messages);
-    // console.log('eventsMessage', eventmesssage);
-
-    if (messages && messages?.event) {
-      console.log(messages);
-      // const data = {
-      //   event: messages.getString('event'),
-      //   currentStage: messages.getInt('currentStage'),
-      //   buffer: messages.getString('buffer'),
-      //   shouldContinue: messages.getBoolean('shouldContinue'),
-      //   fieldId: messages.getInt('fieldId'),
-      //   maxLength: messages.getInt('maxLength'),
-      //   minLength: messages.getInt('minLength'),
-      // };
-      const data = {
-        event: messages.event,
-        currentStage: messages.currentStage,
-        buffer: messages.buffer,
-        shouldContinue: messages.shouldContinue,
-        fieldId: messages.fieldId,
-        maxLength: messages.maxLength,
-        minLength: messages.minLength,
-      };
-      console.log(messages.buffer);
-
-      if (data.buffer === 'Forneca o numero do cartao') {
-        handlePinpadDisplayMessage('Entre com o cartão');
-        setEventData(data);
-      }
-    } else {
-      console.log('eventsMessage', messages);
-    }
-  });
 
   useEffect(() => {
     CliSiteFModule.configure(
@@ -94,19 +85,93 @@ const App = () => {
       '00000000000000',
       '00000000000000',
     );
+
+    const eventEmitter = new NativeEventEmitter(CliSiteFModule.eventsMessage);
+
+    const eventListenerOnData = eventEmitter.addListener(
+      'onData',
+      (message: any) => {
+        console.log('message', message);
+        if (message) {
+          if (message?.event) {
+            console.log('event buffer', message.buffer);
+            setNotifications(prevState => [message, ...prevState]);
+            // const data: OnData = {
+            //   event: message.event,
+            //   currentStage: message.currentStage,
+            //   buffer: message.buffer,
+            //   shouldContinue: message.shouldContinue,
+            //   fieldId: message.fieldId,
+            //   maxLength: message.maxLength,
+            //   minLength: message.minLength,
+            // };
+
+            if (message.buffer === 'Forneca o numero do cartao') {
+              // handlePinpadDisplayMessage('Entre com o cartão');
+              setEventData('card');
+            } else if (
+              message.buffer === 'Forneca a data de vencimento do cartao (MMAA)'
+            ) {
+              // handlePinpadDisplayMessage(
+              //   'Forneca a data de vencimento do cartao (MMAA)',
+              // );
+              setEventData('vencimento');
+            } else if (message.buffer === 'Selecione a forma de pagamento') {
+              // handlePinpadDisplayMessage('Selecione a forma de pagamento');
+
+              setEventData('forma de pagamento');
+            }
+          } else {
+            console.log('onData', message);
+          }
+        }
+      },
+    );
+
+    const eventListenerOnTransactionResult = eventEmitter.addListener(
+      'onTransactionResult',
+      (messages: any) => {
+        const data: OnData = {buffer: messages};
+        setNotifications(prevState => [data, ...prevState]);
+        console.log('onTransactionResult', messages);
+      },
+    );
+
+    const eventListenerBluetoothEvents = eventEmitter.addListener(
+      'bluetoothEvents',
+      (messages: any) => {
+        const data: OnData = {buffer: messages};
+        setNotifications(prevState => [data, ...prevState]);
+        console.log('bluetoothEvents', messages);
+      },
+    );
+
+    return () => {
+      eventListenerOnData.remove();
+      eventListenerOnTransactionResult.remove();
+      eventListenerBluetoothEvents.remove();
+    };
   }, []);
 
+  console.log('COMPONENTE RENDERIZADO');
   return (
     <SafeAreaView>
       <StatusBar barStyle={'dark-content'} backgroundColor="#000" />
-      <View style={{margin: 35}}>
+      <View style={{height: 200}}>
+        <FlatList
+          data={notifications}
+          renderItem={({item}) => <Text>{item.buffer}</Text>}
+          ListEmptyComponent={<Text>Sem dados</Text>}
+        />
+      </View>
+      <View style={{margin: 15}}>
         <Button
           title="PING Native Module!"
           color="#841584"
           onPress={handlePing}
         />
       </View>
-      <View style={{margin: 35, marginBottom: 15}}>
+      <View style={{margin: 15}}>
         <TextInput
           style={{backgroundColor: '#FFF', color: '#000', marginBottom: 10}}
           placeholder="Valor"
@@ -121,18 +186,20 @@ const App = () => {
           onPress={hanldeStartTransaction}
         />
       </View>
-      <View style={{margin: 35, marginBottom: 15}}>
+      <View style={{margin: 15}}>
         <Button
           title="Continuar transação!"
           color="#841584"
           onPress={() => handleContinueTransaction()}
         />
       </View>
-      <View style={{margin: 35, marginBottom: 15}}>
+      <View style={{margin: 15}}>
         <Button
           title="Cancelar transação!"
           color="#841584"
-          onPress={() => handleAbortTransaction(-1)}
+          onPress={() => {
+            handleAbortTransaction(-1), setEventData([]);
+          }}
         />
       </View>
       <View style={{margin: 15}}>
@@ -165,14 +232,17 @@ const App = () => {
 };
 
 const NewModuleButton = () => {
-  const onPress = () => {
-    CalendarModule.createCalendarEvent(
-      'Evento Teste',
-      'Curitiba - PR',
-      (error, eventId) => {
-        console.log(`Created a new event with id ${eventId}`);
-      },
-    );
+  const onPress = async () => {
+    try {
+      const eventId = await CalendarModule.createCalendarEvent(
+        'Evento Teste',
+        'Curitiba - PR',
+      );
+
+      console.log(`Created a new event with id ${eventId}`);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return <Button title="Create Event!" color="#841584" onPress={onPress} />;

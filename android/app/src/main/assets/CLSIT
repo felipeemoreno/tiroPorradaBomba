@@ -9,7 +9,7 @@ DiretorioTrace=./files
 HabilitaTrace=1
 
 [PinPad]
-MensagemPadrao=Xablau
+MensagemPadrao=TBSales
 
 [SiTef]
 EnderecoIP=127.0.0.1;192.168.0.250;192.168.0.1

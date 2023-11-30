@@ -14,8 +14,7 @@ interface CalendarInterface {
   createCalendarEvent(
     name: string,
     location: string,
-    callback?: (error: any, eventId: string) => void,
-  ): void;
+  ): Promise<{eventId: String}>;
   getConstants(): ConstantesInterface;
 }
 export default CalendarModule as CalendarInterface;
