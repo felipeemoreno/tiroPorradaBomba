@@ -10,65 +10,65 @@ import {
   ToastAndroid,
   FlatList,
   Text,
+  Modal,
+  Alert,
 } from 'react-native';
 
 import CliSiteFModule from './CliSiteFModule';
 import CalendarModule from './CalendarModule';
 
 import {OnData} from './model/onData';
+import {clisiTef} from './clisitef/clisitef';
 
 const App = () => {
   const [notifications, setNotifications] = useState<OnData[]>([]);
   const [amount, setAmount] = useState<string>();
-  const [eventData, setEventData] = useState<{}>();
+  const [modalTitle, setModalTitle] = useState<string>();
+  const [inputPlaceholder, setInputPlaceholder] = useState<string>();
+  const [modalOpened, setModalOpened] = useState<boolean>(false);
 
   const handlePing = () => {
-    CliSiteFModule.ping('React Button Clicked!');
+    clisiTef.ping();
   };
 
   const handlePinpadDisplayMessage = async (message: string) => {
     try {
-      const response = await CliSiteFModule.setPinpadDisplayMessage(message);
+      const response = await clisiTef.setPinpadDisplayMessage(message);
       console.log('response pinpad display', response);
     } catch (e) {
       console.log(e);
     }
   };
 
-  const handlePinpadReadYesNo = async () => {
-    const response = await CliSiteFModule.pinpadReadYesNo('pinpadReadYesNo');
-    console.log('response', response);
-  };
+  // const handlePinpadReadYesNo = async () => {
+  //   const response = clisiTef.pinpadReadYesNo();
+  //   console.log('response Read', response);
+  // };
 
-  const handlePinpadIsPresent = async () => {
-    const response = await CliSiteFModule.pinpadIsPresent();
-    console.log('response is present', response);
-  };
+  // const handlePinpadIsPresent = async () => {
+  //   const response = clisiTef.pinpadIsPresent();
+  //   console.log('response is present', response);
+  // };
 
   const hanldeStartTransaction = async () => {
     if (!isNaN(Number(amount))) {
       try {
-        const response = await CliSiteFModule.startTransaction(Number(amount));
+        const response = await clisiTef.startTransaction(Number(amount));
         console.log('startTransaction', response);
-      } catch (error) {
-        console.log('response error start', error);
+      } catch (e) {
+        ToastAndroid.show(`Erro ${e}`, 5000);
+
+        console.log('response error start');
       }
     } else {
       ToastAndroid.show('Insira o valor da compra', 2000);
     }
   };
 
-  const handleContinueTransaction = async () => {
+  const handleContinueTransaction = async (data: string) => {
     try {
-      let data = '';
-      if (eventData === 'card') {
-        data = '5555666677778884';
-      } else if (eventData === 'vencimento') {
-        data = '1122';
-      } else if (eventData === 'forma de pagamento') {
-        data = '1';
-      }
-      const response = await CliSiteFModule.continueTransaction(data);
+      handleModalOpened(false);
+      const response = await CliSiteFModule.continueTransaction(data ?? '');
       console.log('response continue', response);
     } catch (error) {}
   };
@@ -77,52 +77,37 @@ const App = () => {
     CliSiteFModule.abortTransaction(value);
   };
 
+  const handleModalOpened = (value: boolean) => {
+    setModalOpened(value);
+  };
+
   useEffect(() => {
-    CliSiteFModule.configure(
-      '192.168.0.17',
-      '00000000',
-      'SE000001',
-      '00000000000000',
-      '00000000000000',
-    );
+    clisiTef.configure();
 
     const eventEmitter = new NativeEventEmitter(CliSiteFModule.eventsMessage);
 
     const eventListenerOnData = eventEmitter.addListener(
       'onData',
-      (message: any) => {
-        console.log('message', message);
-        if (message) {
-          if (message?.event) {
-            console.log('event buffer', message.buffer);
-            setNotifications(prevState => [message, ...prevState]);
-            // const data: OnData = {
-            //   event: message.event,
-            //   currentStage: message.currentStage,
-            //   buffer: message.buffer,
-            //   shouldContinue: message.shouldContinue,
-            //   fieldId: message.fieldId,
-            //   maxLength: message.maxLength,
-            //   minLength: message.minLength,
-            // };
-
-            if (message.buffer === 'Forneca o numero do cartao') {
-              // handlePinpadDisplayMessage('Entre com o cartão');
-              setEventData('card');
-            } else if (
-              message.buffer === 'Forneca a data de vencimento do cartao (MMAA)'
-            ) {
-              // handlePinpadDisplayMessage(
-              //   'Forneca a data de vencimento do cartao (MMAA)',
-              // );
-              setEventData('vencimento');
-            } else if (message.buffer === 'Selecione a forma de pagamento') {
-              // handlePinpadDisplayMessage('Selecione a forma de pagamento');
-
-              setEventData('forma de pagamento');
+      (event: any) => {
+        console.log('message', event);
+        if (event?.event) {
+          console.log('event buffer', event.buffer);
+          setNotifications(prevState => [event, ...prevState]);
+          if (!event.shouldContinue) {
+            if (event.event === 'GET_FIELD') {
+              setModalTitle(event.buffer);
+              setInputPlaceholder('');
+              handleModalOpened(true);
+            } else if (event.event === 'MENU_TITLE') {
+              setModalTitle(event.buffer);
+              handleModalOpened(true);
+              setInputPlaceholder('');
+            } else if (event.event === 'MENU_OPTIONS') {
+              setInputPlaceholder(event.buffer);
+              !modalOpened && handleModalOpened(true);
             }
           } else {
-            console.log('onData', message);
+            console.log('onData', event);
           }
         }
       },
@@ -157,7 +142,14 @@ const App = () => {
   return (
     <SafeAreaView>
       <StatusBar barStyle={'dark-content'} backgroundColor="#000" />
-      <View style={{height: 200}}>
+      <ModalInput
+        title={modalTitle}
+        placeholder={inputPlaceholder}
+        modalOpened={modalOpened}
+        handleModalOpened={handleModalOpened}
+        handleContinueTransaction={handleContinueTransaction}
+      />
+      <View style={{height: 300}}>
         <FlatList
           data={notifications}
           renderItem={({item}) => <Text>{item.buffer}</Text>}
@@ -186,20 +178,18 @@ const App = () => {
           onPress={hanldeStartTransaction}
         />
       </View>
-      <View style={{margin: 15}}>
+      {/* <View style={{margin: 15}}>
         <Button
           title="Continuar transação!"
           color="#841584"
           onPress={() => handleContinueTransaction()}
         />
-      </View>
+      </View> */}
       <View style={{margin: 15}}>
         <Button
           title="Cancelar transação!"
           color="#841584"
-          onPress={() => {
-            handleAbortTransaction(-1), setEventData([]);
-          }}
+          onPress={() => handleAbortTransaction(-1)}
         />
       </View>
       <View style={{margin: 15}}>
@@ -209,7 +199,7 @@ const App = () => {
           onPress={() => handlePinpadDisplayMessage('Botão 1')}
         />
       </View>
-      <View style={{margin: 15}}>
+      {/* <View style={{margin: 15}}>
         <Button
           title="PinPad Read Yes No!"
           color="#841584"
@@ -222,12 +212,72 @@ const App = () => {
           color="#841584"
           onPress={() => handlePinpadIsPresent()}
         />
-      </View>
+      </View> */}
 
       <View style={{margin: 35, marginTop: 100}}>
         <NewModuleButton />
       </View>
     </SafeAreaView>
+  );
+};
+
+type ModalInputProps = {
+  title?: string;
+  placeholder?: string;
+  modalOpened: boolean;
+  handleModalOpened: (value: boolean) => void;
+  handleContinueTransaction: (data: string) => void;
+};
+const ModalInput: React.FC<ModalInputProps> = ({
+  title,
+  placeholder,
+  modalOpened,
+  handleModalOpened,
+  handleContinueTransaction,
+}) => {
+  const [data, setData] = useState<string>();
+
+  const handleOk = () => {
+    handleContinueTransaction(data ?? '');
+    setData('');
+  };
+
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalOpened}
+      onRequestClose={() => {
+        Alert.alert('Modal has been closed.');
+        handleModalOpened(!modalOpened);
+      }}>
+      <View
+        style={{
+          backgroundColor: '#000000DD',
+          flex: 1,
+        }}>
+        <View style={{justifyContent: 'center', flex: 1, margin: 50}}>
+          <Text>{title}</Text>
+          <TextInput
+            style={{backgroundColor: '#FFF', color: '#000', marginBottom: 10}}
+            placeholder={placeholder}
+            placeholderTextColor="#666"
+            onChangeText={setData}
+            value={data}
+          />
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Button
+              title="Cancelar"
+              color="#841584"
+              onPress={() => {
+                console.log('cancelar button'), handleModalOpened(false);
+              }}
+            />
+            <Button title="OK" color="#841584" onPress={handleOk} />
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 };
 

@@ -38,7 +38,7 @@ class CliSiteFModule(private val reactContext: ReactApplicationContext) : ReactC
         cnpjEmpresa: String,
         cnpjLoja: String
     ) {
-        tefMethods.configure(enderecoSitef, codigoLoja, numeroTerminal, "[TipoPinPad=ANDROID_BT];[ParmsClient=1=$cnpjLoja;2=$cnpjEmpresa]")
+        tefMethods.configure(enderecoSitef, codigoLoja, numeroTerminal, "[TipoPinPad=ANDROID_AUTO];[ParmsClient=1=$cnpjLoja;2=$cnpjEmpresa]")
         cliSiTef.setMessageHandler((cliSiTefListener as CliSiTefListener).onMessage(handler.looper))
 
         Log.d("cliSiTef version", cliSiTef.version.toString())
@@ -81,7 +81,8 @@ class CliSiteFModule(private val reactContext: ReactApplicationContext) : ReactC
     @ReactMethod
     fun startTransaction(amount: Int, promise: Promise) {
         tefMethods.setResultHandler(promise)
-        tefMethods.startTransaction(cliSiTefListener, 6, "100", "2", "3", "4", "5")
+        tefMethods.startTransaction(cliSiTefListener, 3, "100", "2", "3", "4", "5")
+//        tefMethods.startTransaction(cliSiTefListener, 775, "100", "2", "3", "4", "5")
         Log.d("CliSiteF", "startTransaction value: ${amount.toString()}")
     }
 

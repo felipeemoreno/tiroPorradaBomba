@@ -1,7 +1,16 @@
 import CliSiteFModule from '../CliSiteFModule';
 
-const clisiTef = {
-  configure: () => {
+let instance;
+
+class ClisiTef {
+  constructor() {
+    if (instance) {
+      throw new Error('You can only create one instace!');
+    }
+    instance = this;
+  }
+
+  configure() {
     CliSiteFModule.configure(
       '192.168.0.17',
       '00000000',
@@ -9,24 +18,25 @@ const clisiTef = {
       '00000000000000',
       '00000000000000',
     );
-  },
+  }
 
-  ping: (pingMsg?: string) => {
+  ping(pingMsg?: string) {
     CliSiteFModule.ping(`React Ping! ${pingMsg ?? ''}`);
-  },
+  }
 
-  setPinpadDisplayMessage: async (message: string) => {
+  async setPinpadDisplayMessage(message: string) {
     return await CliSiteFModule.setPinpadDisplayMessage(message);
-  },
+  }
 
-  pinpadReadYesNo: async () => {
+  async pinpadReadYesNo() {
     return await CliSiteFModule.pinpadReadYesNo('pinpadReadYesNo');
-  },
+  }
 
-  pinpadIsPresent: async () => {
+  async pinpadIsPresent() {
     return await CliSiteFModule.pinpadIsPresent();
-  },
-  startTransaction: async (amount: number) => {
+  }
+
+  async startTransaction(amount: number) {
     try {
       const pinPadIsPresent = await CliSiteFModule.pinpadIsPresent();
       if (pinPadIsPresent) {
@@ -37,7 +47,7 @@ const clisiTef = {
     } catch (e) {
       throw e;
     }
-  },
-};
+  }
+}
 
-export {clisiTef};
+export default ClisiTef;
